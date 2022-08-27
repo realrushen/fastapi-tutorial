@@ -1,80 +1,21 @@
 from enum import Enum
 
 from fastapi import FastAPI, Query, Path, Body
-from pydantic import BaseModel
-
-
-class ModelName(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
-
-
-class Item(BaseModel):
-    name: str
-    description: str | None = None
-    price: float
-    tax: float | None = None
-
-
-class User(BaseModel):
-    username: str
-    full_name: str | None = None
-
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
 
-@app.post("/items/")
-async def create_item(item: Item):
-    item_dict = item.dict()
-    if item.tax:
-        price_with_tax = item.price + item.tax
-        item_dict.update({"price_with_tax": price_with_tax})
-    return item_dict
+class Item(BaseModel):
+    name: str
+    description: str | None = Field(
+        default=None, title="The description of the item", max_length=300
+    )
+    price: float = Field(gt=0, description="The price must be greater than zero")
+    tax: float | None = None
 
 
 @app.put("/items/{item_id}")
-async def update_item(
-        *,
-        item_id: int,
-        item: Item,
-        user: User,
-        importance: int = Body(gt=0),
-        q: str | None = None
-):
-    results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
-    if q:
-        results.update({"q": q})
-    return results
-
-
-@app.get("/items/")
-async def read_items(
-        q: str
-           | None = Query(
-            default=None,
-            alias="item-query",
-            title="Query string",
-            description="Query string for the items to search in the database that have a good match",
-            min_length=3,
-            max_length=50,
-            regex="^fixedquery$",
-            deprecated=True,
-        )
-):
-    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
-    if q:
-        results.update({"q": q})
-    return results
-
-
-@app.get("/items/{item_id}")
-async def read_items(
-        item_id: int = Path(title="The ID of the item to get"),
-        q: str | None = Query(default=None, alias="item-query"),
-):
-    results = {"item_id": item_id}
-    if q:
-        results.update({"q": q})
+async def update_item(item_id: int, item: Item = Body(embed=True)):
+    results = {"item_id": item_id, "item": item}
     return results
