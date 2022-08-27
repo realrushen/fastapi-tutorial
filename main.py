@@ -1,6 +1,6 @@
 from enum import Enum
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 
@@ -30,8 +30,29 @@ async def create_item(item: Item):
 
 
 @app.put("/items/{item_id}")
-async def create_item(item_id: int, item: Item, q: str | None = None):
-    result = {"item_id": item_id, **item.dict()}
+async def create_item(item_id: int, item: Item,
+                      q: str | None = Query(default=None, min_length=3, max_length=50, regex="^fixedquery$")):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
     if q:
-        result.update({"q": q})
-    return result
+        results.update({"q": q})
+    return results
+
+
+@app.get("/items/")
+async def read_items(
+    q: str
+    | None = Query(
+        default=None,
+        alias="item-query",
+        title="Query string",
+        description="Query string for the items to search in the database that have a good match",
+        min_length=3,
+        max_length=50,
+        regex="^fixedquery$",
+        deprecated=True,
+    )
+):
+    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+    if q:
+        results.update({"q": q})
+    return results
