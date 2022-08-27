@@ -11,24 +11,11 @@ Accept: application/json
 ###
 
 GET http://127.0.0.1:8000/users/me
-Accept: application/json
+
+<> 2022-08-27T220447.200.json
 
 ###
 
 GET http://127.0.0.1:8000/users/3
-Accept: application/json
 
-###
-GET http://127.0.0.1:8000/models/alexnet
-Accept: application/json
-###
-GET http://127.0.0.1:8000/models/resnet
-
-###
-GET http://127.0.0.1:8000/models/lenet
-Accept: application/json
-
-
-###
-GET http://127.0.0.1:8000/models/
-Accept: application/json
+<> 2022-08-27T220550.200.json
