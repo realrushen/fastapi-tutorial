@@ -1,6 +1,6 @@
 from enum import Enum
 
-from fastapi import FastAPI, Query, Path
+from fastapi import FastAPI, Query, Path, Body
 from pydantic import BaseModel
 
 
@@ -17,6 +17,11 @@ class Item(BaseModel):
     tax: float | None = None
 
 
+class User(BaseModel):
+    username: str
+    full_name: str | None = None
+
+
 app = FastAPI()
 
 
@@ -30,9 +35,15 @@ async def create_item(item: Item):
 
 
 @app.put("/items/{item_id}")
-async def create_item(item_id: int, item: Item,
-                      q: str | None = Query(default=None, min_length=3, max_length=50, regex="^fixedquery$")):
-    results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
+async def update_item(
+        *,
+        item_id: int,
+        item: Item,
+        user: User,
+        importance: int = Body(gt=0),
+        q: str | None = None
+):
+    results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
     if q:
         results.update({"q": q})
     return results
