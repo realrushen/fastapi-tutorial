@@ -1,8 +1,8 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Form
 
 app = FastAPI()
 
 
-@app.post("/items/", status_code=status.HTTP_40)
-async def create_item(name: str):
-    return {"name": name}
+@app.post("/login/")
+async def login(username: str = Form(), password: str = Form()):
+    return {"username": username}
