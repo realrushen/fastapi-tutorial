@@ -1,8 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 app = FastAPI()
 
 
-@app.get("/keyword-weights/", response_model=dict[str, float])
-async def read_keyword_weights():
-    return {"foo": 2.3, "bar": 3}
+@app.post("/items/", status_code=status.HTTP_40)
+async def create_item(name: str):
+    return {"name": name}
