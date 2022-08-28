@@ -1,41 +1,31 @@
-from fastapi import FastAPI, HTTPException
-from fastapi.exception_handlers import (
-    http_exception_handler,
-    request_validation_exception_handler,
-)
-from fastapi.exceptions import RequestValidationError
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-items = {"foo": "The Foo Wrestlers"}
+
+class Item(BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    tax: float | None = None
+    tags: set[str] = set()
 
 
-@app.get("/items-header/{item_id}")
-async def read_item_header(item_id: str):
-    if item_id not in items:
-        raise HTTPException(
-            status_code=404,
-            detail="Item not found",
-            headers={"X-Error": "There goes my error"},
-        )
-    return {"item": items[item_id]}
+@app.post(
+    "/items/",
+    response_model=Item,
+    summary="Create an item",
+    response_description="The created item",
+)
+async def create_item(item: Item):
+    """
+    Create an item with all the information:
 
-
-@app.exception_handler(StarletteHTTPException)
-async def custom_http_exception_handler(request, exc):
-    print(f"OMG! An HTTP error!: {repr(exc)}")
-    return await http_exception_handler(request, exc)
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
-    print(f"OMG! The client sent invalid data!: {exc}")
-    return await request_validation_exception_handler(request, exc)
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    if item_id == 3:
-        raise HTTPException(status_code=418, detail="Nope! I don't like 3.")
-    return {"item_id": item_id}
+    - **name**: each item must have a name
+    - **description**: a long description
+    - **price**: required
+    - **tax**: if the item doesn't have tax, you can omit this
+    - **tags**: a set of unique tag strings for this item
+    """
+    return item
